@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(MEDICO)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shifts    Shift[]  // <- Relação com os plantões
+  institution   Institution? @relation(fields: [institutionId], references: [id])
+  institutionId String?
+
+
+  @@map("users")
+}
+
+enum Role {
+  MEDICO
+  ADMIN
+}
+
+model Shift {
+  id            String      @id @default(uuid())
+  date          DateTime
+  startTime     String
+  endTime       String
+  location      String
+  status        ShiftStatus @default(SCHEDULED)
+  justification String?     // justificativa em caso de ausência
+
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum ShiftStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+model Institution {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+}
