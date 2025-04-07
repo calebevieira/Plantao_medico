@@ -1,16 +1,31 @@
-import { Router } from "express";
-import { authenticate } from "../middlewares/auth.middleware";
-import * as InstitutionController from "../controllers/institution.controller";
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-const router = Router();
+// Interface estendida para incluir o usuário
+export interface AuthRequest extends Request {
+  user?: any;
+}
 
-// Criar instituição (somente ADMIN)
-router.post("/institutions", authenticate, InstitutionController.createInstitution);
+// Aqui é a função de autenticação com tipos explícitos e compatíveis
+export const authenticate = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const authHeader = req.headers.authorization;
 
-// Listar todas instituições
-router.get("/institutions", authenticate, InstitutionController.getAllInstitutions);
+  if (!authHeader) {
+    res.status(401).json({ error: "Token não fornecido." });
+    return;
+  }
 
-// Médico se vincular à instituição
-router.patch("/institutions/:id/join", authenticate, InstitutionController.joinInstitution);
+  const [, token] = authHeader.split(" ");
 
-export default router;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    (req as AuthRequest).user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Token inválido." });
+  }
+};

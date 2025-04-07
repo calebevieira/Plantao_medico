@@ -1,16 +1,12 @@
-// src/middlewares/auth.middleware.ts
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+
+import { Request, Response, NextFunction } from "../../backend/node_modules/@types/express";
+import jwt from "../../backend/node_modules/@types/jsonwebtoken";
 
 export interface AuthRequest extends Request {
   user?: any;
 }
 
-export const authenticate = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {

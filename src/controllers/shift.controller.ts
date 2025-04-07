@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Response } from "../../backend/node_modules/@types/express";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import * as ShiftService from "../services/shift.service";
 

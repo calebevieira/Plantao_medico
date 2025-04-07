@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response } from "../../backend/node_modules/@types/express";
 import * as AuthService from "../services/auth.service";
 
 export const register = async (req: Request, res: Response) => {

@@ -1,13 +1,12 @@
-// src/middlewares/auth.middleware.ts
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "../../backend/node_modules/@types/express";
+import jwt from "../../backend/node_modules/@types/jsonwebtoken";
 
 export interface AuthRequest extends Request {
   user?: any;
 }
 
 export const authenticate = (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): void => {
@@ -22,7 +21,7 @@ export const authenticate = (
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    req.user = decoded;
+    (req as AuthRequest).user = decoded;
     next();
   } catch (error) {
     res.status(401).json({ error: "Token inválido." });

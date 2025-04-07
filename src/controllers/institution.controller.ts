@@ -1,5 +1,5 @@
 
-import { Response, RequestHandler } from "express";
+import { Response, RequestHandler } from "../../backend/node_modules/@types/express";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import * as InstitutionService from "../services/institution.service";
 

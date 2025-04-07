@@ -1,5 +1,5 @@
-import express from "express";
-import cors from "cors";
+import express from "../backend/node_modules/@types/express";
+import cors from "../backend/node_modules/@types/cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes";
 import protectedRoutes from "./routes/protected.routes";

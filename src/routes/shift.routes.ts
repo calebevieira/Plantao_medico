@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from "../../backend/node_modules/@types/express";
 import { authenticate } from "../middlewares/auth.middleware";
 import * as ShiftController from "../controllers/shift.controller";
 

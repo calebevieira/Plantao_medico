@@ -5,7 +5,7 @@ const router = Router();
 
 router.get("/protected", authenticate, (req: AuthRequest, res: Response) => {
   res.json({
-    message: "Acesso autorizado! ✅",
+    message: "Acesso autorizado!",
     user: req.user,
   });
 });
