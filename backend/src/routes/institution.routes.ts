@@ -1,31 +1,12 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+// src/routes/institution.routes.ts
+import { Router } from "express";
+import { authenticate } from "../middlewares/auth.middleware";
+import * as InstitutionController from "../controllers/institution.controller";
 
-// Interface estendida para incluir o usuário
-export interface AuthRequest extends Request {
-  user?: any;
-}
+const router = Router();
 
-// Aqui é a função de autenticação com tipos explícitos e compatíveis
-export const authenticate = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  const authHeader = req.headers.authorization;
+router.post("/institutions", authenticate, InstitutionController.createInstitution);
+router.get("/institutions", authenticate, InstitutionController.getAllInstitutions);
+router.patch("/institutions/:id/join", authenticate, InstitutionController.joinInstitution);
 
-  if (!authHeader) {
-    res.status(401).json({ error: "Token não fornecido." });
-    return;
-  }
-
-  const [, token] = authHeader.split(" ");
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    (req as AuthRequest).user = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: "Token inválido." });
-  }
-};
+export default router;

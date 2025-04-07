@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes";
 import protectedRoutes from "./routes/protected.routes";
 import shiftRoutes from "./routes/shift.routes";
-
+import institutionRoutes from "./routes/institution.routes"; // <- importado aqui
 
 dotenv.config();
 
@@ -13,9 +13,7 @@ app.use(cors());
 app.use(express.json());
 app.use(protectedRoutes);
 app.use(shiftRoutes);
-
-
-
+app.use(institutionRoutes); // <- registrado aqui
 
 app.use("/auth", authRoutes);
 

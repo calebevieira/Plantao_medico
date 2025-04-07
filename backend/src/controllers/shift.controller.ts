@@ -47,15 +47,20 @@ export const updateShift = async (req: AuthRequest, res: Response) => {
 };
 
 export const cancelShift = async (req: AuthRequest, res: Response) => {
-    const { id } = req.params;
-    const userId = req.user.userId;
-    const role = req.user.role;
-    const { justification } = req.body;
-  
-    try {
-      const result = await ShiftService.cancelShift(id, { userId, role, justification });
-      res.json(result);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
-    }
-  };  
+  const shiftId = req.params.id;
+  const userId = req.user.userId;
+  const role = req.user.role;
+  const { justification } = req.body;
+
+  try {
+    const shift = await ShiftService.cancelShift(shiftId, {
+      userId,
+      role,
+      justification,
+    });
+
+    res.status(200).json(shift);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
