@@ -1,23 +1,21 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import { json } from "body-parser";
 import authRoutes from "./routes/auth.routes";
-import protectedRoutes from "./routes/protected.routes";
 import shiftRoutes from "./routes/shift.routes";
-import institutionRoutes from "./routes/institution.routes"; // <- importado aqui
-
-dotenv.config();
+import institutionRoutes from "./routes/institution.routes";
 
 const app = express();
+
 app.use(cors());
-app.use(express.json());
-app.use(protectedRoutes);
-app.use(shiftRoutes);
-app.use(institutionRoutes); // <- registrado aqui
+app.use(json());
 
 app.use("/auth", authRoutes);
+app.use("/shifts", shiftRoutes);
+app.use("/institutions", institutionRoutes);
+app.use("/shifts", shiftRoutes);
 
-const PORT = process.env.PORT || 3333;
-app.listen(PORT, () => {
-  console.log(`🔥 Servidor rodando na porta ${PORT}`);
+
+app.listen(3333, () => {
+  console.log("🔥 Servidor rodando na porta 3333");
 });

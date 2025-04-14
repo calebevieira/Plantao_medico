@@ -12,6 +12,8 @@ router.patch("/shifts/:id/cancel", authenticate, ShiftController.cancelShift);
 router.patch("/shifts/:id", authenticate, ShiftController.updateShift);
 router.patch("/shifts/:id/cancel", authenticate, ShiftController.cancelShift);
 router.patch("/shifts/:id", authenticate, ShiftController.updateShift);
+router.get("/mine", authenticate, ShiftController.getMyShifts);
+
 
 
 
