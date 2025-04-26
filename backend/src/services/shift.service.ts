@@ -1,25 +1,30 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 
-const prisma = new PrismaClient();
-
-interface CreateShiftData {
+export interface CreateShiftData {
   userId: string;
-  date: string;
+  date: Date;
   startTime: string;
   endTime: string;
   location: string;
+  institutionId: string; // ✅ Novo campo adicionado aqui
 }
 
 export const createShift = async (data: CreateShiftData) => {
-  return prisma.shift.create({
+  const { userId, date, startTime, endTime, location, institutionId } = data;
+
+  const shift = await prisma.shift.create({
     data: {
-      userId: data.userId,
-      date: new Date(data.date),
-      startTime: data.startTime,
-      endTime: data.endTime,
-      location: data.location,
+      title: "Plantão", // Pode ajustar depois se quiser título personalizado
+      date,
+      startTime,
+      endTime,
+      location,
+      userId,
+      institutionId,
     },
   });
+
+  return shift;
 };
 
 export const getShiftsByUser = async (userId: string) => {
@@ -29,68 +34,19 @@ export const getShiftsByUser = async (userId: string) => {
   });
 };
 
-export const updateShift = async (
-    shiftId: string,
-    {
-      userId,
-      role,
-      date,
-      startTime,
-      endTime,
-      location,
-    }: {
-      userId: string;
-      role: string;
-      date: string;
-      startTime: string;
-      endTime: string;
-      location: string;
-    }
-  ) => {
-    const existing = await prisma.shift.findUnique({ where: { id: shiftId } });
-  
-    if (!existing) throw new Error("Plantão não encontrado");
-  
-    if (existing.userId !== userId && role !== "ADMIN") {
-      throw new Error("Você não tem permissão para editar este plantão");
-    }
-  
-    return prisma.shift.update({
-      where: { id: shiftId },
-      data: {
-        date: new Date(date),
-        startTime,
-        endTime,
-        location,
-      },
-    });
-  };
-  export const cancelShift = async (
-    shiftId: string,
-    {
-      userId,
-      role,
-      justification,
-    }: {
-      userId: string;
-      role: string;
-      justification: string;
-    }
-  ) => {
-    const shift = await prisma.shift.findUnique({ where: { id: shiftId } });
-  
-    if (!shift) throw new Error("Plantão não encontrado");
-  
-    if (shift.userId !== userId && role !== "ADMIN") {
-      throw new Error("Você não tem permissão para cancelar este plantão");
-    }
-  
-    return prisma.shift.update({
-      where: { id: shiftId },
-      data: {
-        status: "CANCELED",
-        justification,
-      },
-    });
-  };
-  
+export const updateShift = async (id: string, data: any) => {
+  return prisma.shift.update({
+    where: { id },
+    data,
+  });
+};
+
+export const cancelShift = async (id: string, data: any) => {
+  return prisma.shift.update({
+    where: { id },
+    data: {
+      ...data,
+      status: "CANCELED",
+    },
+  });
+};

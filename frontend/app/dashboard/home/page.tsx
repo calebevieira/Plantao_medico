@@ -20,14 +20,11 @@ export default function DashboardHomePage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("Token recuperado:", token); // ✅ Adicionado
-  
     if (!token) {
-      console.log("Token não encontrado. Redirecionando...");
       router.push("/login");
       return;
     }
-  
+
     api
       .get<Shift[]>("/shifts/mine", {
         headers: { Authorization: `Bearer ${token}` },
@@ -44,25 +41,27 @@ export default function DashboardHomePage() {
 
   if (isLoading) {
     return (
-      <main className="p-6">
+      <main className="p-4 sm:p-6">
         <p>Carregando plantões...</p>
       </main>
     );
   }
 
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Meus Plantões</h1>
-      <FullCalendar
-        plugins={[dayGridPlugin]}
-        initialView="dayGridMonth"
-        locale={ptBrLocale}
-        events={shifts.map((shift) => ({
-          title: shift.title,
-          date: shift.date,
-        }))}
-        height="auto"
-      />
+    <main className="p-4 sm:p-6 overflow-x-auto">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4">Meus Plantões</h1>
+      <div className="min-w-[360px]">
+        <FullCalendar
+          plugins={[dayGridPlugin]}
+          initialView="dayGridMonth"
+          locale={ptBrLocale}
+          events={shifts.map((shift) => ({
+            title: shift.title,
+            date: shift.date,
+          }))}
+          height="auto"
+        />
+      </div>
     </main>
   );
 }
