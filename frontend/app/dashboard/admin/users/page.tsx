@@ -39,11 +39,27 @@ export default function UsersPage() {
       })
   }, [router])
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este usuário?')) return
+
+    const token = localStorage.getItem('token')
+
+    try {
+      await api.delete(`/auth/users/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      setUsers((prev) => prev.filter((user) => user.id !== id))
+    } catch (err) {
+      console.error('Erro ao excluir usuário:', err)
+    }
+  }
+
   return (
-    <div className="p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
-        <h1 className="text-xl sm:text-2xl font-bold">Usuários</h1>
-        <Button onClick={() => router.push('/dashboard/admin/users/new')} className="w-full sm:w-auto">
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Usuários</h1>
+        <Button onClick={() => router.push('/dashboard/admin/users/new')}>
           Novo Usuário
         </Button>
       </div>
@@ -55,15 +71,25 @@ export default function UsersPage() {
           {users.map((user) => (
             <div
               key={user.id}
-              className="p-4 border rounded-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
+              className="p-4 border rounded-md flex justify-between items-center"
             >
               <div>
-                <p className="font-medium text-sm sm:text-base">{user.name}</p>
-                <p className="text-xs sm:text-sm text-gray-500 break-all">{user.email}</p>
+                <p className="font-medium">{user.name}</p>
+                <p className="text-sm text-gray-500">{user.email}</p>
               </div>
-              <span className="text-xs px-2 py-1 rounded bg-gray-200 text-gray-800 uppercase">
-                {user.role}
-              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    router.push(`/dashboard/admin/users/${user.id}/edit`)
+                  }
+                >
+                  Editar
+                </Button>
+                <Button variant="destructive" className="transition-colors duration-200 hover:bg-red-700" onClick={() => handleDelete(user.id)}>
+                  Excluir
+                </Button>
+              </div>
             </div>
           ))}
         </div>

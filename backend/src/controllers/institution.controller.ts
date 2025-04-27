@@ -1,4 +1,3 @@
-
 import { Response, RequestHandler } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import * as InstitutionService from "../services/institution.service";
@@ -19,9 +18,20 @@ export const createInstitution = (async (req: AuthRequest, res: Response) => {
   }
 }) as unknown as RequestHandler;
 
-export const getAllInstitutions = (async (_req: AuthRequest, res: Response) => {
+export const getAllInstitutions = (async (req: AuthRequest, res: Response) => {
+  const { role, userId } = req.user;
+
   try {
-    const institutions = await InstitutionService.getAllInstitutions();
+    let institutions;
+
+    if (role === "ADMIN") {
+      institutions = await InstitutionService.getAllInstitutions();
+    } else if (role === "MEDICO") {
+      institutions = await InstitutionService.getInstitutionsByUserId(userId);
+    } else {
+      return res.status(403).json({ error: "Não autorizado a visualizar instituições." });
+    }
+
     res.status(200).json(institutions);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
