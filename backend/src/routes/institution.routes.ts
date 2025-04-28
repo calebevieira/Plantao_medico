@@ -8,5 +8,10 @@ const router = Router();
 router.post("/", authenticate, InstitutionController.createInstitution);
 router.get("/", authenticate, InstitutionController.getAllInstitutions);
 router.patch("/:id/join", authenticate, InstitutionController.joinInstitution);
+router.patch("/:id", authenticate, InstitutionController.updateInstitution);
+router.get("/:id", authenticate, InstitutionController.getInstitutionById);
+router.delete("/:id", authenticate, InstitutionController.deleteInstitution);
+
+
 
 export default router;

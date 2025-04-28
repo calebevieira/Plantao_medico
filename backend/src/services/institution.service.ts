@@ -67,3 +67,39 @@ export const joinInstitution = async (userId: string, institutionId: string) => 
     },
   });
 };
+
+// Atualizar instituição
+export const updateInstitution = async (id: string, data: { name: string; address: string }) => {
+  return prisma.institution.update({
+    where: { id },
+    data,
+  });
+};
+
+// Buscar instituição pelo ID (Admin)
+export const getInstitutionById = async (id: string) => {
+  return prisma.institution.findUnique({
+    where: { id },
+  });
+};
+
+// Buscar instituição pelo ID e UserId (Médico)
+export const getInstitutionByUserId = async (id: string, userId: string) => {
+  return prisma.institution.findFirst({
+    where: {
+      id,
+      userInstitutions: {
+        some: {
+          userId: userId,
+        },
+      },
+    },
+  });
+};
+
+// Deletar instituição (Novo!)
+export const deleteInstitution = async (id: string) => {
+  return prisma.institution.delete({
+    where: { id },
+  });
+};

@@ -15,17 +15,13 @@ function isApiError(error: unknown): error is { response: { status: number } } {
   if (typeof error !== 'object' || error === null) {
     return false
   }
-
   if (!('response' in error)) {
     return false
   }
-
   const response = (error as { response?: unknown }).response
-
   if (typeof response !== 'object' || response === null) {
     return false
   }
-
   return 'status' in response && typeof (response as { status?: unknown }).status === 'number'
 }
 
@@ -61,7 +57,6 @@ export default function InstitutionsPage() {
         setInstitutions(res.data)
       } catch (error: unknown) {
         console.error('Erro ao buscar instituições:', error)
-
         if (isApiError(error) && error.response.status === 401) {
           router.push('/login')
         }
@@ -85,6 +80,28 @@ export default function InstitutionsPage() {
       router.refresh()
     } catch (error) {
       console.error('Erro ao entrar na instituição:', error)
+    }
+  }
+
+  const handleDelete = async (institutionId: string) => {
+    const token = localStorage.getItem('token')
+
+    const confirmDelete = window.confirm('Tem certeza que deseja excluir esta instituição?')
+
+    if (!confirmDelete) return
+
+    try {
+      await api.delete(`/institutions/${institutionId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      // Atualiza a lista local sem precisar refazer toda requisição
+      setInstitutions((prev) => prev.filter((inst) => inst.id !== institutionId))
+
+      alert('Instituição excluída com sucesso!')
+    } catch (error) {
+      console.error('Erro ao excluir instituição:', error)
+      alert('Erro ao excluir instituição.')
     }
   }
 
@@ -130,12 +147,20 @@ export default function InstitutionsPage() {
                     Entrar
                   </Button>
                 ) : (
-                  <Button
-                    className="transition-colors duration-200 hover:bg-blue-700"
-                    onClick={() => router.push(`/dashboard/institutions/${institution.id}/edit`)}
-                  >
-                    Editar
-                  </Button>
+                  <>
+                    <Button
+                      className="transition-colors duration-200 hover:bg-blue-700"
+                      onClick={() => router.push(`/dashboard/institutions/${institution.id}/edit`)}
+                    >
+                      Editar
+                    </Button>
+                    <Button
+                      className="transition-colors duration-200 hover:bg-red-700"
+                      onClick={() => handleDelete(institution.id)}
+                    >
+                      Excluir
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
