@@ -106,26 +106,26 @@ export default function DashboardLayout({
             href="/dashboard/home"
             className="flex items-center gap-2 hover:underline"
           >
-            <Home size={18} /> Home
+            <Home size={40} /> Home
           </Link>
           <Link
             href="/dashboard/shifts"
             className="flex items-center gap-2 hover:underline"
           >
-            <CalendarDays size={18} /> Plantões
+            <CalendarDays size={40} /> Plantões
           </Link>
           <Link
             href="/dashboard/institutions"
             className="flex items-center gap-2 hover:underline"
           >
-            <Hospital size={18} /> Instituições
+            <Hospital size={40} /> Instituições
           </Link>
           {isAdmin && (
             <Link
               href="/dashboard/admin/users"
               className="flex items-center gap-2 hover:underline"
             >
-              <Users size={18} /> Usuários
+              <Users size={40} /> Usuários
             </Link>
           )}
           <button
@@ -135,7 +135,7 @@ export default function DashboardLayout({
             }}
             className="flex items-center gap-2 text-left text-red-600 hover:underline mt-4"
           >
-            <LogOut size={18} /> Sair
+            <LogOut size={40} /> Sair
           </button>
         </nav>
       </aside>

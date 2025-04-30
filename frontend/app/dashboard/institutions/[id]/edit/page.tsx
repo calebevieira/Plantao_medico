@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 interface Institution {
@@ -11,162 +12,133 @@ interface Institution {
   address: string
 }
 
-function isApiError(error: unknown): error is { response: { status: number } } {
-  if (typeof error !== 'object' || error === null) {
-    return false
-  }
-  if (!('response' in error)) {
-    return false
-  }
-  const response = (error as { response?: unknown }).response
-  if (typeof response !== 'object' || response === null) {
-    return false
-  }
-  return 'status' in response && typeof (response as { status?: unknown }).status === 'number'
-}
-
-export default function InstitutionsPage() {
-  const [institutions, setInstitutions] = useState<Institution[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false)
+export default function EditInstitutionPage() {
   const router = useRouter()
+  const params = useParams()
+  const institutionId = params.id as string
+
+  const [name, setName] = useState('')
+  const [address, setAddress] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchInstitutions = async () => {
+    const fetchInstitution = async () => {
       const token = localStorage.getItem('token')
-
       if (!token) {
         router.push('/login')
         return
       }
 
-      let payload
       try {
-        payload = JSON.parse(atob(token.split('.')[1]))
-        setIsAdmin(payload.role === 'ADMIN')
-      } catch (err) {
-        console.error('Erro ao decodificar token:', err)
-        router.push('/login')
-        return
-      }
-
-      try {
-        const res = await api.get<Institution[]>('/institutions', {
+        const res = await api.get<Institution>(`/institutions/${institutionId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        setInstitutions(res.data)
-      } catch (error: unknown) {
-        console.error('Erro ao buscar instituições:', error)
-        if (isApiError(error) && error.response.status === 401) {
-          router.push('/login')
-        }
+
+        setName(res.data.name)
+        setAddress(res.data.address)
+      } catch (error) {
+        console.error('Erro ao carregar instituição:', error)
+        setError('Erro ao carregar os dados da instituição.')
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }
 
-    fetchInstitutions()
-  }, [router])
+    if (institutionId) {
+      fetchInstitution()
+    }
+  }, [institutionId, router])
 
-  const handleJoin = async (institutionId: string) => {
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
     const token = localStorage.getItem('token')
 
     try {
-      await api.patch(`/institutions/${institutionId}/join`, {}, {
+      setSaving(true)
+      await api.patch(`/institutions/${institutionId}`, { name, address }, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
-      alert('Você entrou na instituição com sucesso!')
-      router.refresh()
+      alert('Instituição atualizada com sucesso!')
+      router.push('/dashboard/institutions')
     } catch (error) {
-      console.error('Erro ao entrar na instituição:', error)
+      console.error('Erro ao atualizar instituição:', error)
+      setError('Erro ao atualizar a instituição.')
+    } finally {
+      setSaving(false)
     }
   }
 
-  const handleDelete = async (institutionId: string) => {
-    const token = localStorage.getItem('token')
-
+  const handleDelete = async () => {
     const confirmDelete = window.confirm('Tem certeza que deseja excluir esta instituição?')
-
     if (!confirmDelete) return
+
+    const token = localStorage.getItem('token')
 
     try {
       await api.delete(`/institutions/${institutionId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
-      // Atualiza a lista local sem precisar refazer toda requisição
-      setInstitutions((prev) => prev.filter((inst) => inst.id !== institutionId))
-
       alert('Instituição excluída com sucesso!')
+      router.push('/dashboard/institutions')
     } catch (error) {
       console.error('Erro ao excluir instituição:', error)
-      alert('Erro ao excluir instituição.')
+      setError('Erro ao excluir a instituição.')
     }
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="p-6">
-        <p>Carregando instituições...</p>
+        <p>Carregando dados da instituição...</p>
       </div>
     )
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Instituições</h1>
-        {isAdmin && (
-          <Button onClick={() => router.push('/dashboard/institutions/new')}>
-            Nova Instituição
-          </Button>
-        )}
-      </div>
+    <div className="p-6 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Editar Instituição</h1>
 
-      {institutions.length === 0 ? (
-        <p>Nenhuma instituição encontrada.</p>
-      ) : (
-        <div className="space-y-2">
-          {institutions.map((institution) => (
-            <div
-              key={institution.id}
-              className="p-4 border rounded-md flex justify-between items-center"
-            >
-              <div>
-                <p className="font-medium">{institution.name}</p>
-                <p className="text-sm text-gray-500">{institution.address}</p>
-              </div>
-
-              <div className="flex space-x-2">
-                {!isAdmin ? (
-                  <Button
-                    className="transition-colors duration-200 hover:bg-green-700"
-                    onClick={() => handleJoin(institution.id)}
-                  >
-                    Entrar
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      className="transition-colors duration-200 hover:bg-blue-700"
-                      onClick={() => router.push(`/dashboard/institutions/${institution.id}/edit`)}
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      className="transition-colors duration-200 hover:bg-red-700"
-                      onClick={() => handleDelete(institution.id)}
-                    >
-                      Excluir
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
+      <form onSubmit={handleUpdate} className="space-y-4">
+        <div>
+          <label htmlFor="name" className="text-sm font-medium">Nome</label>
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
-      )}
+
+        <div>
+          <label htmlFor="address" className="text-sm font-medium">Endereço</label>
+          <Input
+            id="address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+          />
+        </div>
+
+        {error && <p className="text-sm text-red-500">{error}</p>}
+
+        <div className="flex items-center justify-between">
+          <Button type="submit" disabled={saving}>
+            {saving ? 'Salvando...' : 'Salvar Alterações'}
+          </Button>
+
+          <Button
+            type="button"
+            className="bg-red-600 hover:bg-red-700"
+            onClick={handleDelete}
+          >
+            Excluir
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }
